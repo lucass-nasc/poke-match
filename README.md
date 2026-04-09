@@ -9,4 +9,4 @@
 | Nome | GitHub |
 |------|--------|
 | Lucas Nascimento | [@lucass-nasc] |
-| Jorge Rodrigues | [@usuario2] |
+| Jorge Rodrigues | [@jorgersn04-pixel] |
