@@ -7,7 +7,8 @@
 
 ## Integrantes
 | Nome | GitHub |
-| Natã Ribeiro | [@NataCarvalho] |
+| --- | --- |
+| Natã Ribeiro | [@natacarvalho] |
 | Lucas Nascimento | [@lucass-nasc] |
 | Jorge Rodrigues | [@jorgersn04-pixel] |
 
