@@ -1,0 +1,230 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "a4401abc-ed20-4fca-89cf-02f686d37ee1",
+      "name": "When chat message received",
+      "webhookId": "7ee1e037-d0aa-4afb-bcf3-570566985a3f"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Você é o especialista do PokeMatch. Sua função é receber o nome de um Pokémon, usar a ferramenta PokéAPI para verificar os tipos e a experiência dele, e então obrigatoriamente sugerir outros 2 Pokémon que formem um time equilibrado, cobrindo as fraquezas do Pokémon inicial."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "8eb92bde-afdc-44b4-9e68-b82e8efbde77",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        80,
+        208
+      ],
+      "id": "6f64f634-4e44-4b52-9ef2-9bf558b8a303",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "dNO5eeiBKNxnDBjW",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        224,
+        208
+      ],
+      "id": "1984602f-9e71-4dce-9d3b-262e0d14fa73",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Sempre que o usuário perguntar sobre um Pokémon, use a ferramenta para ver os dados dele e obrigatoriamente sugira outros 2 Pokémon para formar um time equilibrado que cubra as fraquezas do primeiro.",
+        "url": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('URL', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        368,
+        208
+      ],
+      "id": "d307b34d-17bb-4ab3-b365-e55ebe17c3b4",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "049c1d75-6460-4b27-8c82-b541e1b9ea72",
+              "leftValue": "={{ $json.base_experience }}",
+              "rightValue": 200,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        560,
+        0
+      ],
+      "id": "180d8926-3a45-4904-92bc-d1fb0bef7ac0",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "{{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        768,
+        -96
+      ],
+      "id": "804f48e3-dec3-4f91-b418-42b2000a710b",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "{{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        768,
+        96
+      ],
+      "id": "f29a51fd-16bd-4b7d-ac29-6cdc53a1bcc2",
+      "name": "Respond to Webhook1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "98a18eb5-09be-4bb3-b0ec-77908a0297c2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ecd11ba5a343d28da3a9d2ad8a6021dc341b4b0eec54364855c26a869b9f4185"
+  },
+  "id": "OUkdg7PUDErs0igN",
+  "tags": []
+}
