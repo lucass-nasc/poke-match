@@ -1,5 +1,5 @@
 {
-  "name": "My workflow",
+  "name": "My workflow 2",
   "nodes": [
     {
       "parameters": {
@@ -11,69 +11,62 @@
         0,
         0
       ],
-      "id": "a4401abc-ed20-4fca-89cf-02f686d37ee1",
+      "id": "0c9ac48e-86e3-44ae-bd33-1cf896fe3456",
       "name": "When chat message received",
-      "webhookId": "7ee1e037-d0aa-4afb-bcf3-570566985a3f"
+      "webhookId": "04556690-acb2-4fc6-96f1-d4d53c0bd21c"
     },
     {
       "parameters": {
-        "options": {
-          "systemMessage": "Você é o especialista do PokeMatch. Sua função é receber o nome de um Pokémon, usar a ferramenta PokéAPI para verificar os tipos e a experiência dele, e então obrigatoriamente sugerir outros 2 Pokémon que formem um time equilibrado, cobrindo as fraquezas do Pokémon inicial."
-        }
+        "url": "=https://pokeapi.co/api/v2/pokemon/{{ $('When chat message received').item.json.chatInput.toLowerCase() }}",
+        "options": {}
       },
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 3.1,
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
       "position": [
         208,
         0
       ],
-      "id": "8eb92bde-afdc-44b4-9e68-b82e8efbde77",
-      "name": "AI Agent"
+      "id": "74e6ef61-ec96-4193-8705-c8363d299bf3",
+      "name": "HTTP Request",
+      "retryOnFail": true,
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-3.1-flash-lite-preview",
+          "mode": "list",
+          "cachedResultName": "models/gemini-3.1-flash-lite-preview"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "Você é um assistente especialista em Pokémon. Responda com entusiasmo e dê informações úteis sobre o Pokémon consultado. Responda de forma prática e direta.",
+              "role": "model"
+            },
+            {
+              "content": "=Dados do Pokémon {{ $('When chat message received').item.json.chatInput }}:\n- Tipos: {{ $('HTTP Request').item.json.types.map(t => t.type.name).join(', ') }}\n- Altura: {{ $('HTTP Request').item.json.height / 10 }} metros\n- Peso: {{ $('HTTP Request').item.json.weight / 10 }} kg\n- Habilidades: {{ $('HTTP Request').item.json.abilities.map(a => a.ability.name).join(', ') }}\n\nCom base nesses dados, me conta tudo sobre esse Pokémon!"
+            }
+          ]
+        },
+        "builtInTools": {},
         "options": {}
       },
-      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
-      "typeVersion": 1,
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
       "position": [
-        80,
-        208
+        624,
+        -144
       ],
-      "id": "6f64f634-4e44-4b52-9ef2-9bf558b8a303",
-      "name": "Google Gemini Chat Model",
+      "id": "3df62e87-868d-4672-b0f5-997652031b72",
+      "name": "Message a model",
       "credentials": {
         "googlePalmApi": {
           "id": "dNO5eeiBKNxnDBjW",
           "name": "Google Gemini(PaLM) Api account"
         }
       }
-    },
-    {
-      "parameters": {},
-      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
-      "typeVersion": 1.3,
-      "position": [
-        224,
-        208
-      ],
-      "id": "1984602f-9e71-4dce-9d3b-262e0d14fa73",
-      "name": "Simple Memory"
-    },
-    {
-      "parameters": {
-        "toolDescription": "Sempre que o usuário perguntar sobre um Pokémon, use a ferramenta para ver os dados dele e obrigatoriamente sugira outros 2 Pokémon para formar um time equilibrado que cubra as fraquezas do primeiro.",
-        "url": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('URL', ``, 'string') }}",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.httpRequestTool",
-      "typeVersion": 4.4,
-      "position": [
-        368,
-        208
-      ],
-      "id": "d307b34d-17bb-4ab3-b365-e55ebe17c3b4",
-      "name": "HTTP Request"
     },
     {
       "parameters": {
@@ -86,12 +79,13 @@
           },
           "conditions": [
             {
-              "id": "049c1d75-6460-4b27-8c82-b541e1b9ea72",
-              "leftValue": "={{ $json.base_experience }}",
-              "rightValue": 200,
+              "id": "454b94ea-11e1-406e-ab9f-2f7ad2bcb313",
+              "leftValue": "={{ $json.name }}",
+              "rightValue": "",
               "operator": {
-                "type": "number",
-                "operation": "gt"
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
               }
             }
           ],
@@ -102,41 +96,57 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        560,
+        416,
         0
       ],
-      "id": "180d8926-3a45-4904-92bc-d1fb0bef7ac0",
+      "id": "bb9311bf-782f-4212-bfaf-99af26c3c1a4",
       "name": "If"
     },
     {
       "parameters": {
-        "respondWith": "text",
-        "responseBody": "{{ $json.output }}",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "659f15c5-0274-4af8-a1a8-987361d4f99a",
+              "name": "output",
+              "value": "Pokémon não encontrado! Verifique o nome e tente novamente. Exemplo: pikachu, charmander, bulbasaur.",
+              "type": "string"
+            }
+          ]
+        },
         "options": {}
       },
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1.5,
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
       "position": [
-        768,
-        -96
+        624,
+        96
       ],
-      "id": "804f48e3-dec3-4f91-b418-42b2000a710b",
-      "name": "Respond to Webhook"
+      "id": "d808e28c-b748-40fa-9c09-ef64d1f43493",
+      "name": "Edit Fields"
     },
     {
       "parameters": {
-        "respondWith": "text",
-        "responseBody": "{{ $json.output }}",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "610e218c-c6a3-4765-8b1c-7ae77d0ea5bb",
+              "name": "output",
+              "value": "={{ $json.content.parts[0].text }}",
+              "type": "string"
+            }
+          ]
+        },
         "options": {}
       },
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1.5,
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
       "position": [
-        768,
-        96
+        976,
+        -131.92257726192474
       ],
-      "id": "f29a51fd-16bd-4b7d-ac29-6cdc53a1bcc2",
-      "name": "Respond to Webhook1"
+      "id": "d4212374-a3fc-43cc-ac16-32ba30a511fe",
+      "name": "Edit Fields1"
     }
   ],
   "pinData": {},
@@ -145,47 +155,14 @@
       "main": [
         [
           {
-            "node": "AI Agent",
+            "node": "HTTP Request",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Google Gemini Chat Model": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Simple Memory": {
-      "ai_memory": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_memory",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "HTTP Request": {
-      "ai_tool": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_tool",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "AI Agent": {
       "main": [
         [
           {
@@ -200,14 +177,25 @@
       "main": [
         [
           {
-            "node": "Respond to Webhook",
+            "node": "Message a model",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Respond to Webhook1",
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
             "type": "main",
             "index": 0
           }
@@ -220,11 +208,11 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "98a18eb5-09be-4bb3-b0ec-77908a0297c2",
+  "versionId": "3bf32a7a-7003-4c22-bebd-fcc7dc118440",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "ecd11ba5a343d28da3a9d2ad8a6021dc341b4b0eec54364855c26a869b9f4185"
   },
-  "id": "OUkdg7PUDErs0igN",
+  "id": "P8QF4P10u1SFKHYF",
   "tags": []
 }
