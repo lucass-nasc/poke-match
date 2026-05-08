@@ -18,11 +18,12 @@ O projeto automatiza a criação de sugestões de times para Pokémon. A entrada
 ## Arquitetura
 
 ```mermaid
-graph LR
-    A[Usuário] -->|Escolhe Pokémon| B(Formulário Python)
-    B -->|Consulta Tipos| C[PokéAPI]
-    C -->|Retorna Dados| B
-    B -->|Envia Contexto| D[Google Gemini API]
-    D -->|Sugere Time| B
-    B -->|Envia Relatório| E[Brevo SMTP/API]
-    E -->|Entrega| F[E-mail do Usuário]
+flowchart LR
+    U([Usuário]) --> CT[Chat Trigger]
+    CT -->|Envia nome do Pokémon| HR[HTTP Request\nPokeAPI]
+    HR -->|Consulta dados do Pokémon| IF{IF\nPokémon existe?}
+    IF -->|Envia contexto ao modelo| GM[Google Gemini API]
+    IF -->|Pokémon não encontrado| ER[Edit Fields\nMensagem de erro]
+    GM -->|Sugere time e curiosidades| EF[Edit Fields\nextrai output]
+    EF -->|Exibe resposta ao usuário| R([Resposta no chat])
+    ER -->|Exibe erro ao usuário| R
