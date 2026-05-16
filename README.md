@@ -11,9 +11,11 @@ O projeto automatiza a criação de sugestões de times para Pokémon. A entrada
 ## Integrantes
 | Nome | GitHub |
 | --- | --- |
-| Natã Ribeiro | [@natacarvalho] |
-| Lucas Nascimento | [@lucass-nasc] |
-| Jorge Rodrigues | [@jorgersn04-pixel] |
+| Jorge Rodrigues | [@jorgersn04-pixel](https://github.com/jorgersn04-pixel) |
+| Lucas Nascimento | [@lucass-nasc](https://github.com/lucass-nasc) |
+| Natã Ribeiro | [@natacarvalho](https://github.com/NataCarvalho) |
+
+
 
 ## Arquitetura
 
